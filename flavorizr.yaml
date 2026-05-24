@@ -1,0 +1,33 @@
+app:
+  android:
+    flavorDimensions: "flavor-type"
+  ios:
+    bundleIdPrefix: "com.downormal.use_me"
+flavors:
+  latte:
+    app:
+      name: "Use Me Latte"
+    android:
+      applicationId: "com.downormal.use_me.latte"
+      icon: "assets/icons/icon_latte.png"
+    ios:
+      bundleId: "com.downormal.use_me.latte"
+      icon: "assets/icons/icon_latte.png"
+  macchiato:
+    app:
+      name: "Use Me Macchiato"
+    android:
+      applicationId: "com.downormal.use_me.macchiato"
+      icon: "assets/icons/icon_macchiato.png"
+    ios:
+      bundleId: "com.downormal.use_me.macchiato"
+      icon: "assets/icons/icon_macchiato.png"
+  espresso:
+    app:
+      name: "Use Me"
+    android:
+      applicationId: "com.downormal.use_me"
+      icon: "assets/icons/icon_espresso.png"
+    ios:
+      bundleId: "com.downormal.use_me"
+      icon: "assets/icons/icon_espresso.png"

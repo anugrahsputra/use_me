@@ -1,0 +1,70 @@
+PODS:
+  - Alamofire (5.9.1)
+  - connectivity_plus (0.0.1):
+    - Flutter
+  - CryptoSwift (1.10.0)
+  - cupertino_http (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - Flutter (1.0.0)
+  - flutter_secure_storage_darwin (10.0.0):
+    - Flutter
+    - FlutterMacOS
+  - http_certificate_pinning (3.0.0):
+    - Alamofire (~> 5.9.0)
+    - CryptoSwift
+    - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
+  - Sentry/HybridSDK (8.46.0)
+  - sentry_flutter (8.14.2):
+    - Flutter
+    - FlutterMacOS
+    - Sentry/HybridSDK (= 8.46.0)
+
+DEPENDENCIES:
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
+  - Flutter (from `Flutter`)
+  - flutter_secure_storage_darwin (from `.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
+  - http_certificate_pinning (from `.symlinks/plugins/http_certificate_pinning/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - CryptoSwift
+    - Sentry
+
+EXTERNAL SOURCES:
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
+  cupertino_http:
+    :path: ".symlinks/plugins/cupertino_http/darwin"
+  Flutter:
+    :path: Flutter
+  flutter_secure_storage_darwin:
+    :path: ".symlinks/plugins/flutter_secure_storage_darwin/darwin"
+  http_certificate_pinning:
+    :path: ".symlinks/plugins/http_certificate_pinning/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  sentry_flutter:
+    :path: ".symlinks/plugins/sentry_flutter/ios"
+
+SPEC CHECKSUMS:
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  CryptoSwift: e2e7776512f250e66205955da748e7a4e4abffe0
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_secure_storage_darwin: acdb3f316ed05a3e68f856e0353b133eec373a23
+  http_certificate_pinning: 133f28ad5c2d1ecda2581dd2d2cd9dc74da59012
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
+  sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
+
+PODFILE CHECKSUM: 1fe942a128edb57521f1f2ae94e2bdad611a5945
+
+COCOAPODS: 1.16.2

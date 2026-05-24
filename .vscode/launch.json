@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Latte",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_latte.dart",
+            "args": [
+                "--flavor",
+                "latte"
+            ]
+        },
+        {
+            "name": "Macchiato",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_macchiato.dart",
+            "args": [
+                "--flavor",
+                "macchiato"
+            ]
+        },
+        {
+            "name": "Espresso",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_espresso.dart",
+            "args": [
+                "--flavor",
+                "espresso"
+            ]
+        }
+    ]
+}
