@@ -52,10 +52,10 @@ echo "🔄 Updating project names and imports..."
 flutter pub global run change_project_name --config rename.json
 
 # 2. Run flavorizr to apply the changes to Android/iOS native files
-# We specify only the necessary processors to avoid overwriting our custom app.dart and pages/
+# We specify only the necessary processors to avoid overwriting our custom app.dart, pages/, and flavors.dart
 # We MUST include assets:download and assets:extract so flavorizr has its internal templates/scripts
 echo "⚙️ Running flavorizr to generate native configurations..."
-dart run flutter_flavorizr -p assets:download,assets:extract,android:androidManifest,android:flavorizrGradle,android:buildGradle,android:icons,flutter:flavors,ios:podfile,ios:xcconfig,ios:buildTargets,ios:schema,ios:icons,ios:plist,ios:launchScreen,assets:clean,ide:config
+dart run flutter_flavorizr -p assets:download,assets:extract,android:androidManifest,android:flavorizrGradle,android:buildGradle,android:icons,ios:podfile,ios:xcconfig,ios:buildTargets,ios:schema,ios:icons,ios:plist,ios:launchScreen,assets:clean,ide:config
 
 # 3. Clean up
 echo "🧹 Cleaning up and resolving dependencies..."
