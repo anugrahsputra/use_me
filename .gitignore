@@ -48,3 +48,7 @@ app.*.map.json
 .fvm/\n# Environment Variables\n.env*
 
 sentry.properties
+
+.env.espresso
+.env.latte
+.env.macchiato
