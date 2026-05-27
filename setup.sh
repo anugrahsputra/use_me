@@ -51,7 +51,28 @@ EOF
 echo "🔄 Updating project names and imports..."
 flutter pub global run change_project_name --config rename.json
 
-# 2. Run flavorizr to apply the changes to Android/iOS native files
+# 2. Explicitly update configuration files using sed to ensure flavorizr has the correct inputs
+echo "📝 Ensuring configuration files are updated..."
+SED_OPTS=(-i '') # For macOS
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    SED_OPTS=(-i) # For Linux
+fi
+
+# Update flavorizr.yaml
+sed "${SED_OPTS[@]}" "s/$OLD_PACKAGE/$new_package/g" flavorizr.yaml
+sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" flavorizr.yaml
+
+# Update flavors.dart
+sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" lib/flavors.dart
+
+# Update .env files
+for flavor in latte macchiato espresso; do
+  if [ -f ".env.$flavor" ]; then
+    sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" ".env.$flavor"
+  fi
+done
+
+# 3. Run flavorizr to apply the changes to Android/iOS native files
 # We specify only the necessary processors to avoid overwriting our custom app.dart, pages/, and flavors.dart
 # We MUST include assets:download and assets:extract so flavorizr has its internal templates/scripts
 echo "⚙️ Running flavorizr to generate native configurations..."
