@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 const _fineColor = '\x1B[32m'; // Green
@@ -11,7 +12,10 @@ const _resetColor = '\x1B[0m'; // ✅ Fix: was '\x1B' (incomplete escape)
 abstract class AppLogging {
   static bool isInitialize = false;
 
-  static Future<void> initialize({bool showLog = false}) async {
+  static Future<void> initialize({
+    bool showLog = false,
+    bool? enableColor,
+  }) async {
     if (!AppLogging.isInitialize) {
       Logger.root.level = showLog ? Level.ALL : Level.OFF;
 
@@ -22,15 +26,27 @@ abstract class AppLogging {
         final stackTrace = record.stackTrace;
         final error = record.error;
 
-        String levelColor = switch (level) {
-          Level.FINE || Level.FINER || Level.FINEST => _fineColor,
-          Level.SEVERE || Level.SHOUT || Level.WARNING => _severeColor,
-          Level.INFO || Level.CONFIG => _infoColor,
-          _ => '',
-        };
+        final bool useColor =
+            enableColor ??
+            (stdout.supportsAnsiEscapes &&
+                !Platform.isIOS &&
+                !Platform.isAndroid);
+
+        String levelColor = '';
+        String resetColor = '';
+
+        if (useColor) {
+          levelColor = switch (level) {
+            Level.FINE || Level.FINER || Level.FINEST => _fineColor,
+            Level.SEVERE || Level.SHOUT || Level.WARNING => _severeColor,
+            Level.INFO || Level.CONFIG => _infoColor,
+            _ => '',
+          };
+          resetColor = _resetColor;
+        }
 
         final formattedMessage =
-            '$levelColor[${level.name}][$name] : $message$_resetColor';
+            '$levelColor[${level.name}][$name] : $message$resetColor';
         final errorString = error != null ? '\n  Error      : $error' : '';
         final stackTraceString = stackTrace != null
             ? '\n  StackTrace : $stackTrace'
@@ -44,6 +60,8 @@ abstract class AppLogging {
         } else {
           stdout.writeln(fullMessage);
         }
+
+        debugPrint(fullMessage);
 
         // ✅ Keep this if you still want VSCode debug console support
         developer.log(fullMessage, name: name);
