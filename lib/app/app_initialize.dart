@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:use_me/app/app.dart';
 import 'package:use_me/core/core.dart';
+import 'package:use_me/features/auth/auth.dart';
 import 'package:use_me/injections.dart';
 
 Future<void> appInitialize() async {
   unawaited(AppLogging.initialize(showLog: true));
-  await initDI();
+  await configureDependencies();
 
   // Listen for isolate errors too
   // Isolate.current.addErrorListener(
@@ -36,4 +38,15 @@ Future<void> appInitialize() async {
   //   appRunner: () => runApp(SentryWidget(child: const App())),
   // );
   runApp(const App());
+}
+
+mixin class AppModule {
+  static Future<void> register(GetIt sl) async {
+    sl.registerFactory<AppCubit>(
+      () => AppCubit(
+        localStorageManager: sl<LocalStorageManager>(),
+        logoutUsecase: sl<LogoutUsecase>(),
+      ),
+    );
+  }
 }

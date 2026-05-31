@@ -5,22 +5,23 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:logging/logging.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/flavors.dart';
-import 'package:use_me/injections.dart';
+
 
 class ClientInterceptor extends Interceptor with InterceptorMixin {
   ClientInterceptor({
+    required this.dio,
     ClientRequestRetrier? requestRetrier,
     required this.localStoreManager,
   }) : requestRetrier =
            requestRetrier ??
            ClientRequestRetrier(
-             dio: di<Dio>(instanceName: 'interceptor'),
+             dio: dio,
              internetConnectionChecker:
                  InternetConnectionChecker.createInstance(),
            );
 
   final Logger log = Logger('Dio Interceptor');
-  Dio dio = di<Dio>(instanceName: 'interceptor');
+  final Dio dio;
   final LocalStorageManager localStoreManager;
   final ClientRequestRetrier requestRetrier;
   bool _isRefreshing = false;

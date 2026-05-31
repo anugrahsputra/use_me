@@ -39,11 +39,8 @@ void main() {
     mockLocalStore = MockLocalStorageManager();
     mockRetrier = MockClientRequestRetrier();
 
-    final sl = GetIt.instance;
-    sl.reset();
-    sl.registerFactory<Dio>(() => mockDio, instanceName: 'interceptor');
-
     interceptor = ClientInterceptor(
+      dio: mockDio,
       localStoreManager: mockLocalStore,
       requestRetrier: mockRetrier,
     );
@@ -100,10 +97,8 @@ void main() {
 
   group('constructor', () {
     test('uses default requestRetrier when not provided', () {
-      final sl = GetIt.instance;
-      sl.registerFactory<Dio>(() => mockDio, instanceName: 'interceptor');
-
       final defaultInterceptor = ClientInterceptor(
+        dio: mockDio,
         localStoreManager: mockLocalStore,
       );
       expect(defaultInterceptor, isA<ClientInterceptor>());
