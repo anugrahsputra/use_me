@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/flavors.dart';
@@ -33,7 +32,6 @@ void main() {
   });
 
   setUp(() {
-    Logger.root.level = Level.OFF;
 
     mockDio = MockDio();
     mockLocalStore = MockLocalStorageManager();

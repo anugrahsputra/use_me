@@ -1,6 +1,5 @@
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:use_me/core/core.dart';
 
@@ -11,7 +10,6 @@ void main() {
   late StoreKey storeKey;
 
   setUp(() {
-    Logger.root.level = Level.OFF;
     mockStorage = MockLocalStorageManager();
     storeKey = StoreKey(localStorageManager: mockStorage);
   });

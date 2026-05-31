@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logging/logging.dart';
 import 'package:use_me/app/app.dart';
 import 'package:use_me/features/auth/auth.dart';
 import 'package:use_me/features/home/home.dart';
@@ -10,8 +9,6 @@ part 'app_routes.dart';
 part 'app_transition.dart';
 
 class AppNavigator {
-  final Logger log = Logger('AppNavigator');
-
   /// Check if can pop
   bool canPop(BuildContext context) => GoRouter.of(context).canPop();
 

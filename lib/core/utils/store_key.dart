@@ -4,14 +4,12 @@ import 'dart:typed_data';
 
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:logging/logging.dart';
+import 'package:use_me/core/utils/app_logging.dart';
 import 'package:use_me/core/core.dart';
 
 class StoreKey {
   StoreKey({required this.localStorageManager});
   final LocalStorageManager localStorageManager;
-  final Logger log = Logger('Local storage manager');
-
   Future<String> generateKey() async {
     final random = Random.secure();
     final bytes = List<int>.generate(32, (_) => random.nextInt(256));
@@ -23,7 +21,7 @@ class StoreKey {
   Future<String> getStoredKey() async {
     var key = await localStorageManager.readFromStorage('encryption_key');
     key ??= await generateKey();
-    log.info('Stored key: $key');
+    talker.info('Stored key: $key');
 
     return key;
   }

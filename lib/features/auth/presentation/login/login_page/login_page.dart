@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:logging/logging.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/features/auth/auth.dart';
 import 'package:use_me/injections.dart';
@@ -19,7 +18,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AppNavigator appNavigator = di<AppNavigator>();
   final LoginBloc loginBloc = di<LoginBloc>();
-  final Logger log = Logger('Login View');
 
   @override
   Widget build(BuildContext context) {

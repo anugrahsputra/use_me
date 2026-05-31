@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:logging/logging.dart';
+import 'package:use_me/core/utils/app_logging.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/flavors.dart';
 
@@ -20,7 +20,6 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
                  InternetConnectionChecker.createInstance(),
            );
 
-  final Logger log = Logger('Dio Interceptor');
   final Dio dio;
   final LocalStorageManager localStoreManager;
   final ClientRequestRetrier requestRetrier;
@@ -72,7 +71,7 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
       );
       return newAccessToken.toString();
     } catch (e) {
-      log.severe('Token refresh failed: $e');
+      talker.error('Token refresh failed: $e');
       return null;
     }
   }
@@ -98,13 +97,13 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    log
-      ..fine('➡️ Request [${options.method}] => URL: ${options.uri}')
-      ..fine('➡️ Headers: ${options.headers}')
+    talker
+      ..debug('➡️ Request [${options.method}] => URL: ${options.uri}')
+      ..debug('➡️ Headers: ${options.headers}')
       ..info('➡️ On Send Progress: ${options.onSendProgress}');
 
     if (options.data != null) {
-      log.fine('➡️ Body: ${_formatRequestBody(options.data)}');
+      talker.debug('➡️ Body: ${_formatRequestBody(options.data)}');
     }
     options.headers['Content-Type'] = 'application/json';
     options.headers['x-api-key'] = F.apiKey;
@@ -117,12 +116,12 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    log.fine('Response: ${response.requestOptions.uri}');
+    talker.debug('Response: ${response.requestOptions.uri}');
     if (response.data is String) {
       jsonDecode(response.data as String);
     }
     if (response.statusCode == 304) {
-      log.shout('cache hit: ${response.requestOptions.uri}');
+      talker.warning('cache hit: ${response.requestOptions.uri}');
     }
     super.onResponse(response, handler);
   }
@@ -132,10 +131,10 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    log
-      ..severe('Error: ${err.requestOptions.uri}')
-      ..severe('Error: ${err.response!.data}')
-      ..severe('Error: ${err.response!.statusCode}');
+    talker
+      ..error('Error: ${err.requestOptions.uri}')
+      ..error('Error: ${err.response!.data}')
+      ..error('Error: ${err.response!.statusCode}');
 
     switch (err.response?.statusCode) {
       case 400:
@@ -230,13 +229,13 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
         // Connection errors have no status code — handle separately
         if (isConnectionError(err)) {
           try {
-            log.warning('Connection Error: ${err.requestOptions.uri}');
+            talker.warning('Connection Error: ${err.requestOptions.uri}');
             final response = await requestRetrier.retryRequest(
               err.requestOptions,
             );
             return handler.resolve(response);
           } on NetworkException {
-            log.severe('Connection Error: ${err.requestOptions.uri}');
+            talker.error('Connection Error: ${err.requestOptions.uri}');
             return handler.reject(
               DioException(
                 requestOptions: err.requestOptions,

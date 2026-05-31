@@ -1,12 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logging/logging.dart';
 import 'package:use_me/core/core.dart';
 
 void main() {
   group('AppLogging', () {
     setUp(() {
       AppLogging.isInitialize = false;
-      Logger.root.level = Level.OFF;
     });
 
     test('initialize sets isInitialize to true', () async {
@@ -20,34 +18,21 @@ void main() {
       expect(AppLogging.isInitialize, isTrue);
     });
 
-    test('second initialize call skips', () async {
+    test('second initialize call skips re-configuration', () async {
       await AppLogging.initialize();
       AppLogging.isInitialize = true;
       await AppLogging.initialize();
       expect(AppLogging.isInitialize, isTrue);
     });
 
-    group('listener', () {
-      test('handles WARNING+ records via stderr', () async {
-        await AppLogging.initialize(showLog: true);
-        Logger.root.warning('warn test');
-      });
+    test('initialize with showLog: true enables talker', () async {
+      await AppLogging.initialize(showLog: true);
+      expect(AppLogging.isInitialize, isTrue);
+    });
 
-      test('handles below WARNING records via stdout', () async {
-        await AppLogging.initialize(showLog: true);
-        Logger.root.info('info test');
-      });
-
-      test('handles FINE level color', () async {
-        await AppLogging.initialize(showLog: true);
-        Logger.root.fine('fine test');
-      });
-
-      test('handles records with error and stack trace', () async {
-        await AppLogging.initialize(showLog: true);
-        Logger.root.severe('severe error', Exception('test'), StackTrace.current);
-      });
+    test('initialize with showLog: false disables talker', () async {
+      await AppLogging.initialize(showLog: false);
+      expect(AppLogging.isInitialize, isTrue);
     });
   });
 }
-

@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:use_me/core/core.dart';
-import 'package:logging/logging.dart';
 import 'package:use_me/features/auth/auth.dart';
 
 part 'login_event.dart';
@@ -24,8 +23,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   final LoginUsecase loginUsecase;
-
-  final Logger _log = Logger('LoginBloc');
 
   void _loginOnEmailChanged(OnEmailChanged event, Emitter<LoginState> emit) {
     final email = Email.dirty(event.email);
@@ -69,7 +66,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     final loginReq = LoginRequest(email: email.value, password: password.value);
     final result = await loginUsecase(loginReq);
 
-    _log.info(loginReq.toJson());
     result.fold(
       (l) => emit(
         state.copyWith(
