@@ -8,7 +8,8 @@
             "program": "lib/main_latte.dart",
             "args": [
                 "--flavor",
-                "latte"
+                "latte",
+                "--dart-define-from-file=.env.latte.json"
             ]
         },
         {
@@ -18,7 +19,8 @@
             "program": "lib/main_macchiato.dart",
             "args": [
                 "--flavor",
-                "macchiato"
+                "macchiato",
+                "--dart-define-from-file=.env.macchiato.json"
             ]
         },
         {
@@ -28,7 +30,8 @@
             "program": "lib/main_espresso.dart",
             "args": [
                 "--flavor",
-                "espresso"
+                "espresso",
+                "--dart-define-from-file=.env.espresso.json"
             ]
         }
     ]

@@ -49,6 +49,6 @@ app.*.map.json
 
 sentry.properties
 
-.env.espresso
-.env.latte
-.env.macchiato
+.env.espresso.json
+.env.latte.json
+.env.macchiato.json

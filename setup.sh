@@ -67,8 +67,11 @@ sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" lib/flavors.dart
 
 # Update .env files
 for flavor in latte macchiato espresso; do
-  if [ -f ".env.$flavor" ]; then
-    sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" ".env.$flavor"
+  if [ -f ".env.$flavor.json" ]; then
+    sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" ".env.$flavor.json"
+  fi
+  if [ -f ".env.$flavor.json.example" ]; then
+    sed "${SED_OPTS[@]}" "s/$OLD_APPNAME/$new_appname/g" ".env.$flavor.json.example"
   fi
 done
 

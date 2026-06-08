@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
@@ -28,7 +27,7 @@ void main() {
 
   setUpAll(() {
     F.appFlavor = Flavor.latte;
-    dotenv.loadFromString(envString: 'API_KEY=test_key');
+    Environment.apiKey = 'test_key';
   });
 
   setUp(() {

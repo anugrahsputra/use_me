@@ -30,16 +30,30 @@ We use 3 distinct flavors to manage the application lifecycle:
 
 ### Running the App
 
-**Terminal:**
+**Terminal (via Quick Scripts):**
+```bash
+# Run Development (Latte)
+./run_latte.sh
+
+# Run Staging (Macchiato)
+./run_macchiato.sh
+
+# Run Production (Espresso)
+./run_espresso.sh
+```
+
+*(Note: You can pass additional arguments like device targets or build mode directly to the scripts, e.g. `./run_latte.sh -d macOS` or `./run_latte.sh --release`)*
+
+**Terminal (Underlying Commands):**
 ```bash
 # Run Development
-flutter run --flavor latte -t lib/main_latte.dart
+flutter run --flavor latte -t lib/main_latte.dart --dart-define-from-file=.env.latte.json
 
 # Run Staging
-flutter run --flavor macchiato -t lib/main_macchiato.dart
+flutter run --flavor macchiato -t lib/main_macchiato.dart --dart-define-from-file=.env.macchiato.json
 
 # Run Production
-flutter run --flavor espresso -t lib/main_espresso.dart
+flutter run --flavor espresso -t lib/main_espresso.dart --dart-define-from-file=.env.espresso.json
 ```
 
 **VS Code:**
@@ -50,10 +64,10 @@ Open the `Run & Debug` panel and select either **Latte**, **Macchiato**, or **Es
 ## Configuration Management
 
 ### 1. Environment Variables (.env)
-Managed via `flutter_dotenv`. Each flavor loads its own configuration on startup:
-*   `.env.latte`
-*   `.env.macchiato`
-*   `.env.espresso`
+Managed via Flutter's native `--dart-define-from-file` flag. Each flavor loads its own compile-time configuration:
+*   `.env.latte.json`
+*   `.env.macchiato.json`
+*   `.env.espresso.json`
 
 *Note: These files are excluded from git via `.gitignore`.*
 
@@ -136,4 +150,3 @@ lib/
 
 *   [flutter_flavorizr](https://pub.dev/packages/flutter_flavorizr) - Native flavor orchestration.
 *   [change_project_name](https://pub.dev/packages/change_project_name) - Rapid project renaming.
-*   [flutter_dotenv](https://pub.dev/packages/flutter_dotenv) - Environment variable management.

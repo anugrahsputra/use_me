@@ -1,5 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 enum Flavor { latte, macchiato, espresso }
 
 class F {
@@ -31,6 +29,7 @@ class F {
 }
 
 sealed class Environment {
-  static String get appName => dotenv.env['APP_NAME'] ?? 'env not loade';
-  static String get apiKey => dotenv.env['API_KEY'] ?? '';
+  static String appName = const String.fromEnvironment('APP_NAME', defaultValue: 'env not loaded');
+  static String apiKey = const String.fromEnvironment('API_KEY', defaultValue: '');
+  static String apiBaseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: '');
 }
