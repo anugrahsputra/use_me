@@ -1,54 +1,51 @@
-import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-part 'login_dto.freezed.dart';
 part 'login_dto.g.dart';
 
-@freezed
-abstract class LoginRequest with _$LoginRequest {
-  const factory LoginRequest({
-    required String email,
-    required String password,
-  }) = _LoginRequest;
-
+@JsonSerializable(fieldRename: FieldRename.snake)
+class LoginRequest({
+  required final String email,
+  required final String password,
+}) {
   factory LoginRequest.fromJson(Map<String, dynamic> json) =>
       _$LoginRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
 }
 
-@freezed
-abstract class LoginResponse with _$LoginResponse {
-  const factory LoginResponse({
-    @JsonKey(name: 'id') int? id,
-    @JsonKey(name: 'token') required String token,
-    @JsonKey(name: '_meta') required MetaResponse meta,
-  }) = _LoginResponse;
-
+@JsonSerializable(fieldRename: FieldRename.snake)
+class LoginResponse({
+  @JsonKey(name: 'id') final int? id,
+  @JsonKey(name: 'token') required final String token,
+  @JsonKey(name: '_meta') required final MetaResponse meta,
+}) {
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LoginResponseToJson(this);
 }
 
-@freezed
-abstract class MetaResponse with _$MetaResponse {
-  const factory MetaResponse({
-    @JsonKey(name: 'powered_by') required String poweredBy,
-    @JsonKey(name: 'docs_url') required String docsUrl,
-    @JsonKey(name: 'upgrade_url') required String upgradeUrl,
-    @JsonKey(name: 'example_url') required String exampleUrl,
-    @JsonKey(name: 'variant') required String variant,
-    @JsonKey(name: 'message') required String message,
-    @JsonKey(name: 'cta') required CtaResponse cta,
-    @JsonKey(name: 'context') required String context,
-  }) = _MetaResponse;
-
+@JsonSerializable(fieldRename: FieldRename.snake)
+class MetaResponse({
+  required final String poweredBy,
+  required final String docsUrl,
+  required final String upgradeUrl,
+  required final String exampleUrl,
+  required final String variant,
+  required final String message,
+  required final CtaResponse cta,
+  required final String context,
+}) {
   factory MetaResponse.fromJson(Map<String, dynamic> json) =>
       _$MetaResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MetaResponseToJson(this);
 }
 
-@freezed
-abstract class CtaResponse with _$CtaResponse {
-  const factory CtaResponse({required String label, required String url}) =
-      _CtaResponse;
-
+@JsonSerializable(fieldRename: FieldRename.snake)
+class CtaResponse({required final String label, required final String url}) {
   factory CtaResponse.fromJson(Map<String, dynamic> json) =>
       _$CtaResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CtaResponseToJson(this);
 }

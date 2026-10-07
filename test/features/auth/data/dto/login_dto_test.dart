@@ -4,16 +4,9 @@ import 'package:use_me/features/auth/data/dto/login_dto.dart';
 void main() {
   group('LoginRequest', () {
     test('creates with required fields', () {
-      final req = const LoginRequest(email: 'a@b.com', password: 'secret');
+      final req = LoginRequest(email: 'a@b.com', password: 'secret');
       expect(req.email, 'a@b.com');
       expect(req.password, 'secret');
-    });
-
-    test('copyWith updates fields', () {
-      final req = const LoginRequest(email: 'a@b.com', password: 'secret');
-      final copy = req.copyWith(email: 'c@d.com');
-      expect(copy.email, 'c@d.com');
-      expect(copy.password, 'secret');
     });
 
     test('fromJson parses correctly', () {
@@ -23,14 +16,14 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final req = const LoginRequest(email: 'a@b.com', password: 'pwd');
+      final req = LoginRequest(email: 'a@b.com', password: 'pwd');
       expect(req.toJson(), {'email': 'a@b.com', 'password': 'pwd'});
     });
   });
 
   group('CtaResponse', () {
     test('creates with required fields', () {
-      final cta = const CtaResponse(label: 'Go', url: 'https://example.com');
+      final cta = CtaResponse(label: 'Go', url: 'https://example.com');
       expect(cta.label, 'Go');
       expect(cta.url, 'https://example.com');
     });
@@ -97,13 +90,6 @@ void main() {
       expect(json['id'], 1);
       expect(json['token'], 'abc123');
       expect(json['_meta'], isA<MetaResponse>());
-    });
-
-    test('copyWith updates fields', () {
-      final response = LoginResponse.fromJson(loginJson);
-      final copy = response.copyWith(token: 'new_token');
-      expect(copy.token, 'new_token');
-      expect(copy.id, 1);
     });
   });
 }
