@@ -30,20 +30,16 @@ void main() {
       expect(sl.isRegistered<AppCubit>(), isTrue);
     });
 
-    test('AppCubit resolves as a new factory instance each time', () async {
+    test('AppCubit resolves as one shared instance', () async {
       await AppModule.register(sl);
 
       final a = sl<AppCubit>();
+      final b = sl<AppCubit>();
       // Flush pending microtasks so _checkToken completes before we close.
       await Future<void>.microtask(() {});
       await a.close();
 
-      final b = sl<AppCubit>();
-      await Future<void>.microtask(() {});
-      await b.close();
-
-      expect(a, isA<AppCubit>());
-      expect(identical(a, b), isFalse);
+      expect(identical(a, b), isTrue);
     });
   });
 }

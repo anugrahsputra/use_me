@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:use_me/features/auth/auth.dart';
-import 'package:use_me/features/auth/data/data.dart';
-import 'package:use_me/features/auth/domain/domain.dart';
 
 void main() {
   group('LoginMapper', () {

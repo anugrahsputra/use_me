@@ -15,7 +15,7 @@ void main() {
       final transformer = debounce<int>(const Duration(milliseconds: 50));
       final controller = StreamController<int>();
       final events = controller.stream;
-      final mapper = (int event) => Stream<int>.value(event * 2);
+      Stream<int> mapper(int event) => Stream<int>.value(event * 2);
 
       final result = transformer(events, mapper).toList();
 
@@ -27,4 +27,3 @@ void main() {
     });
   });
 }
-

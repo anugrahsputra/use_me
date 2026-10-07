@@ -45,8 +45,8 @@ void main() {
 
   group('NotFoundException', () {
     test('uses default message', () {
-      expect(NotFoundException().message, 'ForbiddenException');
-      expect(NotFoundException().toString(), 'ForbiddenException');
+      expect(NotFoundException().message, 'NotFoundException');
+      expect(NotFoundException().toString(), 'NotFoundException');
     });
   });
 
@@ -68,6 +68,19 @@ void main() {
     test('uses default message', () {
       expect(UnknownException().message, 'UnknownException');
       expect(UnknownException().toString(), 'UnknownException');
+    });
+  });
+
+  group('ConflictException', () {
+    test('uses default message', () {
+      expect(ConflictException().message, 'ConflictException');
+      expect(ConflictException().toString(), 'ConflictException');
+    });
+
+    test('uses custom message', () {
+      final e = ConflictException(message: 'resource conflict');
+      expect(e.message, 'resource conflict');
+      expect(e.toString(), 'resource conflict');
     });
   });
 }

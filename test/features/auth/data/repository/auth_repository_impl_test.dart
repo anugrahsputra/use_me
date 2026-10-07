@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/features/auth/auth.dart';
-import 'package:use_me/features/auth/data/data.dart';
-import 'package:use_me/features/auth/domain/domain.dart';
 
 import '../../../../helper/mocks.dart';
 
@@ -52,7 +50,7 @@ void main() {
       expect(entity, isA<LoginEntity>());
       expect(entity.id, 1);
       expect(entity.token, 'abc123');
-      verify(mockStorage.writeToStorage('token', 'abc123')).called(1);
+      verify(mockStorage.writeToStorage('access_token', 'abc123')).called(1);
     });
 
     test('returns Failure when datasource fails', () async {
@@ -67,7 +65,7 @@ void main() {
   });
 
   group('logout', () {
-    test('returns Unit and deletes token on success', () async {
+    test('returns Unit on success', () async {
       when(mockDatasource.logout())
           .thenAnswer((_) async => const Right(unit));
       when(mockStorage.deleteFromStorage(any))
@@ -76,7 +74,6 @@ void main() {
       final result = await repository.logout();
 
       expect(result.isRight(), isTrue);
-      verify(mockStorage.deleteFromStorage('token')).called(1);
     });
 
     test('returns Failure when datasource fails', () async {

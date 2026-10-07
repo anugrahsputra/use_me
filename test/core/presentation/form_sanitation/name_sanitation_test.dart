@@ -14,21 +14,12 @@ void main() {
     });
 
     test('empty value returns empty error', () {
-      expect(
-        Name.dirty('').validator(''),
-        NameValidationError.empty,
-      );
-      expect(
-        Name.dirty('   ').validator('   '),
-        NameValidationError.empty,
-      );
+      expect(Name.dirty('').validator(''), NameValidationError.empty);
+      expect(Name.dirty('   ').validator('   '), NameValidationError.empty);
     });
 
     test('too short returns tooShort error', () {
-      expect(
-        Name.dirty('ab').validator('ab'),
-        NameValidationError.tooShort,
-      );
+      expect(Name.dirty('ab').validator('ab'), NameValidationError.tooShort);
     });
   });
 }

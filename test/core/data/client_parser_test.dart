@@ -17,15 +17,19 @@ void main() {
 
   group('ClientParser.getParsed', () {
     test('returns parsed response without isolate', () async {
-      when(mockClient.get(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1, 'name': 'test'},
-        statusCode: 200,
-      ));
+      when(
+        mockClient.get(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1, 'name': 'test'},
+          statusCode: 200,
+        ),
+      );
 
       final result = await mockClient.getParsed(
         '/test',
@@ -37,15 +41,19 @@ void main() {
     });
 
     test('returns parsed response with isolate', () async {
-      when(mockClient.get(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1, 'name': 'test'},
-        statusCode: 200,
-      ));
+      when(
+        mockClient.get(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1, 'name': 'test'},
+          statusCode: 200,
+        ),
+      );
 
       final result = await mockClient.getParsed(
         '/test',
@@ -57,89 +65,26 @@ void main() {
     });
 
     test('throws on invalid response format', () async {
-      when(mockClient.get(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: 'not a map',
-        statusCode: 200,
-      ));
+      when(
+        mockClient.get(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: 'not a map',
+          statusCode: 200,
+        ),
+      );
 
       expect(
-        () => mockClient.getParsed('/test', converter: converter, useIsolate: false),
-        throwsA(isA<Exception>()),
-      );
-    });
-  });
-
-  group('ClientParser.getParsedList', () {
-    test('returns parsed list without isolate', () async {
-      when(mockClient.get(
-        '/list',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/list'),
-        data: [
-          {'id': 1},
-          {'id': 2},
-        ],
-        statusCode: 200,
-      ));
-
-      final result = await mockClient.getParsedList(
-        '/list',
-        converter: converter,
-        useIsolate: false,
-      );
-
-      expect(result, [
-        {'id': 1},
-        {'id': 2},
-      ]);
-    });
-
-    test('returns parsed list with isolate', () async {
-      when(mockClient.get(
-        '/list',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/list'),
-        data: [
-          {'id': 1},
-          {'id': 2},
-        ],
-        statusCode: 200,
-      ));
-
-      final result = await mockClient.getParsedList(
-        '/list',
-        converter: converter,
-        useIsolate: true,
-      );
-
-      expect(result, [
-        {'id': 1},
-        {'id': 2},
-      ]);
-    });
-
-    test('throws when response is not a list', () async {
-      when(mockClient.get(
-        '/list',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/list'),
-        data: 'not a list',
-        statusCode: 200,
-      ));
-
-      expect(
-        () => mockClient.getParsedList('/list', converter: converter, useIsolate: false),
+        () => mockClient.getParsed(
+          '/test',
+          converter: converter,
+          useIsolate: false,
+        ),
         throwsA(isA<Exception>()),
       );
     });
@@ -147,16 +92,20 @@ void main() {
 
   group('ClientParser.postParsed', () {
     test('returns parsed response', () async {
-      when(mockClient.post(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        data: anyNamed('data'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1},
-        statusCode: 201,
-      ));
+      when(
+        mockClient.post(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 201,
+        ),
+      );
 
       final result = await mockClient.postParsed(
         '/test',
@@ -169,16 +118,20 @@ void main() {
     });
 
     test('returns parsed response with isolate', () async {
-      when(mockClient.post(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        data: anyNamed('data'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1},
-        statusCode: 201,
-      ));
+      when(
+        mockClient.post(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 201,
+        ),
+      );
 
       final result = await mockClient.postParsed(
         '/test',
@@ -191,19 +144,28 @@ void main() {
     });
 
     test('throws on invalid response format', () async {
-      when(mockClient.post(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        data: anyNamed('data'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: 'not a map',
-        statusCode: 201,
-      ));
+      when(
+        mockClient.post(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: 'not a map',
+          statusCode: 201,
+        ),
+      );
 
       expect(
-        () => mockClient.postParsed('/test', converter: converter, data: {}, useIsolate: false),
+        () => mockClient.postParsed(
+          '/test',
+          converter: converter,
+          data: {},
+          useIsolate: false,
+        ),
         throwsA(isA<Exception>()),
       );
     });
@@ -211,15 +173,19 @@ void main() {
 
   group('ClientParser.getParsedSafe', () {
     test('returns Right on success', () async {
-      when(mockClient.get(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1},
-        statusCode: 200,
-      ));
+      when(
+        mockClient.get(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 200,
+        ),
+      );
 
       final result = await mockClient.getParsedSafe(
         '/test',
@@ -231,40 +197,22 @@ void main() {
     });
   });
 
-  group('ClientParser.getParsedListSafe', () {
-    test('returns Right on success', () async {
-      when(mockClient.get(
-        '/list',
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/list'),
-        data: [{'id': 1}],
-        statusCode: 200,
-      ));
-
-      final result = await mockClient.getParsedListSafe(
-        '/list',
-        converter: converter,
-        useIsolate: false,
-      );
-
-      expect(result.isRight(), isTrue);
-    });
-  });
-
   group('ClientParser.postParsedSafe', () {
     test('returns Right on success', () async {
-      when(mockClient.post(
-        '/test',
-        queryParameters: anyNamed('queryParameters'),
-        data: anyNamed('data'),
-        options: anyNamed('options'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        data: {'id': 1},
-        statusCode: 201,
-      ));
+      when(
+        mockClient.post(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 201,
+        ),
+      );
 
       final result = await mockClient.postParsedSafe(
         '/test',
@@ -274,6 +222,162 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
+    });
+  });
+
+  group('ClientParser.putParsedSafe', () {
+    test('returns Right on success', () async {
+      when(
+        mockClient.put(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 200,
+        ),
+      );
+
+      final result = await mockClient.putParsedSafe(
+        '/test',
+        converter: converter,
+        data: {},
+        useIsolate: false,
+      );
+
+      expect(result.getOrElse(() => {}), {'id': 1});
+    });
+
+    test('returns Left when the interceptor rejects', () async {
+      when(
+        mockClient.put(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          error: ConflictException(message: 'already exists'),
+        ),
+      );
+
+      final result = await mockClient.putParsedSafe(
+        '/test',
+        converter: converter,
+        data: {},
+        useIsolate: false,
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
+  });
+
+  group('ClientParser.patchParsedSafe', () {
+    test('returns Right on success', () async {
+      when(
+        mockClient.patch(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          data: anyNamed('data'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: {'id': 1},
+          statusCode: 200,
+        ),
+      );
+
+      final result = await mockClient.patchParsedSafe(
+        '/test',
+        converter: converter,
+        data: {},
+        useIsolate: false,
+      );
+
+      expect(result.getOrElse(() => {}), {'id': 1});
+    });
+  });
+
+  group('ClientParser.deleteParsedSafe', () {
+    void stubDelete(dynamic data, int statusCode) {
+      when(
+        mockClient.delete(
+          '/test',
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          data: data,
+          statusCode: statusCode,
+        ),
+      );
+    }
+
+    test('returns Right(null) for a 204 with no body', () async {
+      stubDelete(null, 204);
+
+      final result = await mockClient.deleteParsedSafe(
+        '/test',
+        converter: converter,
+        useIsolate: false,
+      );
+
+      expect(result, Right<Failure, Map<String, dynamic>?>(null));
+    });
+
+    test('returns Right(null) for a zero-length body', () async {
+      stubDelete('', 200);
+
+      final result = await mockClient.deleteParsedSafe(
+        '/test',
+        converter: converter,
+        useIsolate: false,
+      );
+
+      expect(result, Right<Failure, Map<String, dynamic>?>(null));
+    });
+
+    test('returns Right(null) when no converter is given', () async {
+      stubDelete({'id': 1}, 200);
+
+      final result = await mockClient.deleteParsedSafe('/test');
+
+      expect(result, Right<Failure, Never?>(null));
+    });
+
+    test('parses the body when a converter is given', () async {
+      stubDelete({'id': 1}, 200);
+
+      final result = await mockClient.deleteParsedSafe(
+        '/test',
+        converter: converter,
+        useIsolate: false,
+      );
+
+      expect(result.getOrElse(() => null), {'id': 1});
+    });
+
+    test('throws on a non-map body', () async {
+      stubDelete('unexpected', 200);
+
+      expect(
+        () => mockClient.deleteParsedSafe(
+          '/test',
+          converter: converter,
+          useIsolate: false,
+        ),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

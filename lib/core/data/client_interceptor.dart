@@ -1,13 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:use_me/core/utils/app_logging.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/flavors.dart';
 
+class ClientInterceptor extends Interceptor {
+  final Dio dio;
 
-class ClientInterceptor extends Interceptor with InterceptorMixin {
+  final LocalStorageManager localStoreManager;
+  final ClientRequestRetrier requestRetrier;
+  bool _isRefreshing = false;
+  final List<Function> _retryQueue = [];
   ClientInterceptor({
     required this.dio,
     ClientRequestRetrier? requestRetrier,
@@ -20,30 +25,151 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
                  InternetConnectionChecker.createInstance(),
            );
 
-  final Dio dio;
-  final LocalStorageManager localStoreManager;
-  final ClientRequestRetrier requestRetrier;
-  bool _isRefreshing = false;
-  final List<Function> _retryQueue = [];
+  @override
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    switch (err.response?.statusCode) {
+      case 401:
+        if (_isRefreshing) {
+          _retryQueue.add(() async {
+            final newToken = await localStoreManager.readFromStorage(
+              'access_token',
+            );
+            final retryResponse = await _retryRequest(
+              err.requestOptions,
+              newToken: newToken,
+            );
+            handler.resolve(retryResponse);
+          });
+          return;
+        }
 
-  String _formatRequestBody(dynamic data) {
-    try {
-      if (data is Map || data is List) {
-        return const JsonEncoder.withIndent('  ').convert(data);
-      } else if (data is FormData) {
-        final fields = data.fields
-            .map((e) => '${e.key}: ${e.value}')
-            .join(', ');
-        final files = data.files
-            .map((e) => '${e.key}: ${e.value.filename}')
-            .join(', ');
-        return 'FormData: { fields: {$fields}, files: {$files} }';
-      } else {
-        return data.toString();
-      }
-    } catch (e) {
-      return 'Could not format request body: $e';
+        _isRefreshing = true;
+
+        final String? newToken;
+        try {
+          newToken = await _refreshToken();
+        } catch (e) {
+          _isRefreshing = false;
+          await _clearTokens();
+          return handler.reject(err.unauthorized('Authentication failed: $e'));
+        }
+
+        if (newToken == null) {
+          _isRefreshing = false;
+          await _clearTokens();
+          return handler.reject(err.unauthorized());
+        }
+
+        try {
+          final queueResults = <Future<void>>[];
+          for (final retry in _retryQueue) {
+            queueResults.add(retry() as Future<void>);
+          }
+
+          await Future.wait(queueResults);
+          _retryQueue.clear();
+
+          final cloneReq = await _retryRequest(
+            err.requestOptions,
+            newToken: newToken,
+          );
+          _isRefreshing = false;
+          return handler.resolve(cloneReq);
+        } catch (e) {
+          _isRefreshing = false;
+          _retryQueue.clear();
+
+          // The retry runs on the bare Dio, which carries no ClientInterceptor,
+          // so its failures arrive untyped. The refresh above already
+          // succeeded, so a status here belongs to the request itself, a 409
+          // for instance. It must not be reported as a dead session, and must
+          // not wipe the tokens we just rotated.
+          if (e is DioException && e.response?.statusCode != 401) {
+            final typed = e.toTyped();
+            if (typed != null) return handler.reject(typed);
+          }
+
+          await _clearTokens();
+          return handler.reject(err.unauthorized('Authentication failed: $e'));
+        }
+
+      default:
+        // Connection errors have no status code — handle separately
+        if (err.isConnectionError) {
+          try {
+            talker.warning('Connection Error: ${err.requestOptions.uri}');
+            final response = await requestRetrier.retryRequest(
+              err.requestOptions,
+            );
+            return handler.resolve(response);
+          } on NetworkException {
+            talker.error('Connection Error: ${err.requestOptions.uri}');
+            return handler.reject(err.withError(NetworkException()));
+          }
+        }
+
+        return handler.reject(
+          err.toTyped() ?? err.withError(UnknownException()),
+        );
     }
+  }
+
+  Future<void> _clearTokens() async {
+    await localStoreManager.deleteFromStorage('access_token');
+    await localStoreManager.deleteFromStorage('refresh_token');
+  }
+
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    options.headers['Content-Type'] = 'application/json';
+    if (F.apiKey.isNotEmpty) options.headers['x-api-key'] = F.apiKey;
+    final authtoken = await localStoreManager.readFromStorage('access_token');
+    if (authtoken != null) {
+      options.headers['Authorization'] = 'Bearer $authtoken';
+    }
+
+    super.onRequest(options, handler);
+  }
+
+  @override
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) async {
+    await _persistRefreshCookie(response.headers);
+    if (response.data is String) {
+      jsonDecode(response.data as String);
+    }
+    if (response.statusCode == 304) {
+      talker.warning('cache hit: ${response.requestOptions.uri}');
+    }
+    super.onResponse(response, handler);
+  }
+
+  Future<void> _persistRefreshCookie(Headers headers) async {
+    final token = _readRefreshCookie(headers);
+    if (token == null) return;
+    await localStoreManager.writeToStorage('refresh_token', token);
+  }
+
+  String? _readRefreshCookie(Headers headers) {
+    final cookies = headers.map[HttpHeaders.setCookieHeader];
+    if (cookies == null) return null;
+
+    const name = 'refresh_token=';
+    for (final cookie in cookies) {
+      if (!cookie.startsWith(name)) continue;
+      final value = cookie.substring(name.length);
+      final end = value.indexOf(';');
+      return end == -1 ? value : value.substring(0, end);
+    }
+    return null;
   }
 
   Future<String?> _refreshToken() async {
@@ -53,25 +179,26 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
     if (refreshToken == null) return null;
 
     try {
-      final response = await dio.post(
+      final response = await dio.post<Map<String, dynamic>>(
         '/auth/refresh',
-        data: {'refresh_token': refreshToken},
+        options: Options(
+          headers: {HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'},
+        ),
       );
 
-      final newAccessToken = response.data['access_token'];
-      final newRefreshToken = response.data['refresh_token'];
+      // Every endpoint answers with {status, message, data: {...}}.
+      final body = response.data?['data'] as Map<String, dynamic>?;
+      final newAccessToken = body?['access_token'] as String?;
+      if (newAccessToken == null) {
+        talker.error('Token refresh returned no access_token');
+        return null;
+      }
 
-      await localStoreManager.writeToStorage(
-        'access_token',
-        newAccessToken.toString(),
-      );
-      await localStoreManager.writeToStorage(
-        'refresh_token',
-        newRefreshToken.toString(),
-      );
-      return newAccessToken.toString();
+      await localStoreManager.writeToStorage('access_token', newAccessToken);
+      await _persistRefreshCookie(response.headers);
+      return newAccessToken;
     } catch (e) {
-      talker.error('Token refresh failed: $e');
+      talker.handle(e, null, 'Token refresh failed');
       return null;
     }
   }
@@ -93,164 +220,5 @@ class ClientInterceptor extends Interceptor with InterceptorMixin {
       queryParameters: requestOptions.queryParameters,
       options: options,
     );
-  }
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    talker
-      ..debug('➡️ Request [${options.method}] => URL: ${options.uri}')
-      ..debug('➡️ Headers: ${options.headers}')
-      ..info('➡️ On Send Progress: ${options.onSendProgress}');
-
-    if (options.data != null) {
-      talker.debug('➡️ Body: ${_formatRequestBody(options.data)}');
-    }
-    options.headers['Content-Type'] = 'application/json';
-    options.headers['x-api-key'] = F.apiKey;
-
-    super.onRequest(options, handler);
-  }
-
-  @override
-  void onResponse(
-    Response<dynamic> response,
-    ResponseInterceptorHandler handler,
-  ) {
-    talker.debug('Response: ${response.requestOptions.uri}');
-    if (response.data is String) {
-      jsonDecode(response.data as String);
-    }
-    if (response.statusCode == 304) {
-      talker.warning('cache hit: ${response.requestOptions.uri}');
-    }
-    super.onResponse(response, handler);
-  }
-
-  @override
-  Future<void> onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
-    talker
-      ..error('Error: ${err.requestOptions.uri}')
-      ..error('Error: ${err.response!.data}')
-      ..error('Error: ${err.response!.statusCode}');
-
-    switch (err.response?.statusCode) {
-      case 400:
-        return handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: BadRequestException(
-              message: err.response!.data['error'] as String,
-            ),
-          ),
-        );
-
-      case 401:
-        if (_isRefreshing) {
-          _retryQueue.add(() async {
-            final newToken = await localStoreManager.readFromStorage(
-              'access_token',
-            );
-            final retryResponse = await _retryRequest(
-              err.requestOptions,
-              newToken: newToken,
-            );
-            handler.resolve(retryResponse);
-          });
-          return;
-        }
-
-        _isRefreshing = true;
-
-        try {
-          final newToken = await _refreshToken();
-
-          if (newToken != null) {
-            final queueResults = <Future<void>>[];
-            for (final retry in _retryQueue) {
-              queueResults.add(retry() as Future<void>);
-            }
-
-            await Future.wait(queueResults);
-            _retryQueue.clear();
-
-            final cloneReq = await _retryRequest(
-              err.requestOptions,
-              newToken: newToken,
-            );
-            _isRefreshing = false;
-            return handler.resolve(cloneReq);
-          } else {
-            await localStoreManager.deleteFromStorage('access_token');
-            await localStoreManager.deleteFromStorage('refresh_token');
-            _isRefreshing = false;
-
-            return handler.reject(
-              DioException(
-                requestOptions: err.requestOptions,
-                error: UnauthorizedException(message: 'Session expired'),
-              ),
-            );
-          }
-        } catch (e) {
-          _isRefreshing = false;
-          await localStoreManager.deleteFromStorage('access_token');
-          await localStoreManager.deleteFromStorage('refresh_token');
-
-          return handler.reject(
-            DioException(
-              requestOptions: err.requestOptions,
-              error: UnauthorizedException(
-                message: 'Authentication failed: ${e.toString()}',
-              ),
-            ),
-          );
-        }
-
-      case 403:
-        return handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: ForbiddenException(),
-          ),
-        );
-
-      case 404:
-        return handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: NotFoundException(),
-          ),
-        );
-
-      default:
-        // Connection errors have no status code — handle separately
-        if (isConnectionError(err)) {
-          try {
-            talker.warning('Connection Error: ${err.requestOptions.uri}');
-            final response = await requestRetrier.retryRequest(
-              err.requestOptions,
-            );
-            return handler.resolve(response);
-          } on NetworkException {
-            talker.error('Connection Error: ${err.requestOptions.uri}');
-            return handler.reject(
-              DioException(
-                requestOptions: err.requestOptions,
-                error: NetworkException(),
-              ),
-            );
-          }
-        }
-
-        return handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: UnknownException(),
-          ),
-        );
-    }
   }
 }

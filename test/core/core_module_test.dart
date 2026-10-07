@@ -4,11 +4,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:use_me/core/core.dart';
+import 'package:use_me/flavors.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late GetIt sl;
+
+  // The 'interceptor' Dio reads F.apiBaseUrl for the token refresh call.
+  setUpAll(() => F.appFlavor = Flavor.latte);
 
   setUp(() {
     sl = GetIt.asNewInstance();
@@ -17,21 +21,21 @@ void main() {
     // doesn't throw MissingPluginException in unit test environments.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (call) async {
-        if (call.method == 'getTemporaryDirectory') return '/tmp';
-        return null;
-      },
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (call) async {
+            if (call.method == 'getTemporaryDirectory') return '/tmp';
+            return null;
+          },
+        );
   });
 
   tearDown(() async {
     await sl.reset();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      null,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          null,
+        );
   });
 
   group('CoreModule.register', () {
@@ -84,34 +88,33 @@ void main() {
       expect(identical(a, b), isFalse);
     });
 
-    test('AppNavigator resolves as a new factory instance each time', () async {
+    test('AppNavigator resolves as a lazy singleton', () async {
       await CoreModule.register(sl);
 
       final a = sl<AppNavigator>();
       final b = sl<AppNavigator>();
 
       expect(a, isA<AppNavigator>());
-      expect(identical(a, b), isFalse);
+      expect(identical(a, b), isTrue);
     });
 
-    test('Dio (unnamed) resolves as a new factory instance each time',
-        () async {
-      await CoreModule.register(sl);
+    test(
+      'Dio (unnamed) resolves as a new factory instance each time',
+      () async {
+        await CoreModule.register(sl);
 
-      final a = sl<Dio>();
-      final b = sl<Dio>();
+        final a = sl<Dio>();
+        final b = sl<Dio>();
 
-      expect(a, isA<Dio>());
-      expect(identical(a, b), isFalse);
-    });
+        expect(a, isA<Dio>());
+        expect(identical(a, b), isFalse);
+      },
+    );
 
     test('Dio (interceptor) named instance is registered', () async {
       await CoreModule.register(sl);
 
-      expect(
-        sl.isRegistered<Dio>(instanceName: 'interceptor'),
-        isTrue,
-      );
+      expect(sl.isRegistered<Dio>(instanceName: 'interceptor'), isTrue);
 
       final dio = sl<Dio>(instanceName: 'interceptor');
       expect(dio, isA<Dio>());

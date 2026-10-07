@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/features/auth/auth.dart';
-import 'package:use_me/features/auth/data/data.dart';
-import 'package:use_me/features/auth/domain/domain.dart';
 
 import '../../../../helper/mocks.dart';
 

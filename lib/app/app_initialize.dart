@@ -3,24 +3,14 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 import 'package:use_me/app/app.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/features/auth/auth.dart';
 import 'package:use_me/injections.dart';
 
 Future<void> appInitialize() async {
-  unawaited(AppLogging.initialize(showLog: true));
-  Bloc.observer = TalkerBlocObserver(
-    settings: TalkerBlocLoggerSettings(
-      enabled: true,
-      printChanges: true,
-      printClosings: false,
-      printCreations: true,
-      printEvents: false,
-      printTransitions: true,
-    ),
-  );
+  AppLogging.initialize();
+  Bloc.observer = AppBlocObserver();
   await configureDependencies();
 
   // Listen for isolate errors too
@@ -54,7 +44,7 @@ Future<void> appInitialize() async {
 
 mixin class AppModule {
   static Future<void> register(GetIt sl) async {
-    sl.registerFactory<AppCubit>(
+    sl.registerLazySingleton<AppCubit>(
       () => AppCubit(
         localStorageManager: sl<LocalStorageManager>(),
         logoutUsecase: sl<LogoutUsecase>(),

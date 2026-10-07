@@ -26,6 +26,13 @@ abstract class Client {
     dynamic data,
   });
 
+  Future<Response<T>> patch<T>(
+    String url, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    dynamic data,
+  });
+
   Future<Response<T>> delete<T>(
     String url, {
     Map<String, dynamic>? queryParameters,
@@ -100,6 +107,29 @@ class ClientImpl implements Client {
     }
 
     return dio.put(
+      url,
+      queryParameters: queryParameters,
+      data: data,
+      options: options,
+    );
+  }
+
+  @override
+  Future<Response<T>> patch<T>(
+    String url, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    dynamic data,
+  }) {
+    if (data is Map<String, dynamic>) {
+      final isMultipart =
+          options?.contentType == Headers.multipartFormDataContentType;
+      if (isMultipart) {
+        data = FormData.fromMap(data);
+      }
+    }
+
+    return dio.patch(
       url,
       queryParameters: queryParameters,
       data: data,

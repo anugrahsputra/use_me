@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AppCubit>(create: (context) => appCubit),
+        BlocProvider<AppCubit>.value(value: appCubit),
         BlocProvider<HomeCubit>(create: (context) => homeCubit),
       ],
       child: MultiBlocListener(
@@ -37,7 +37,6 @@ class _HomePageState extends State<HomePage> {
           BlocListener<AppCubit, AppState>(
             listener: (context, state) {
               state.whenOrNull(
-                unauthenticated: () => di<AppNavigator>().goToSplash(context),
                 error: (error) {
                   if (appNavigator.canPop(context)) {
                     appNavigator.back(context);

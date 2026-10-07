@@ -15,11 +15,20 @@ class IsolateParser<T> {
       _ParserPayload(json, converter, port.sendPort),
     );
 
-    return await port.first as T;
+    final message = await port.first;
+    if (message is _ParserError) {
+      throw UnknownException(message: message.message);
+    }
+    return message as T;
   }
 
   static void _parseAndSend<T>(_ParserPayload<T> payload) {
-    final result = payload.converter(payload.json);
+    Object? result;
+    try {
+      result = payload.converter(payload.json);
+    } catch (e) {
+      result = _ParserError('$e');
+    }
     Isolate.exit(payload.sendPort, result);
   }
 }
@@ -31,34 +40,7 @@ class _ParserPayload<T> {
   final SendPort sendPort;
 }
 
-// use this for list if response is a list of objects
-class IsolateListParser<T> {
-  IsolateListParser(this.jsonList, this.converter);
-  final List<dynamic> jsonList;
-  final T Function(Map<String, dynamic>) converter;
-
-  Future<List<T>> parseInBackground() async {
-    final port = ReceivePort();
-    await Isolate.spawn<_ListParserPayload<T>>(
-      _parseAndSend,
-      _ListParserPayload<T>(jsonList, converter, port.sendPort),
-    );
-
-    return await port.first as List<T>;
-  }
-
-  static void _parseAndSend<T>(_ListParserPayload<T> payload) {
-    final result = payload.jsonList
-        .map<T>((e) => payload.converter(e as Map<String, dynamic>))
-        .toList();
-
-    Isolate.exit(payload.sendPort, result);
-  }
-}
-
-class _ListParserPayload<T> {
-  _ListParserPayload(this.jsonList, this.converter, this.sendPort);
-  final List<dynamic> jsonList;
-  final T Function(Map<String, dynamic>) converter;
-  final SendPort sendPort;
+class _ParserError {
+  _ParserError(this.message);
+  final String message;
 }

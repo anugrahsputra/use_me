@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:use_me/core/core.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 void main() {
   group('safeCall', () {
@@ -13,20 +14,23 @@ void main() {
       expect(result.getOrElse(() => ''), 'success');
     });
 
-    test('returns Left UnauthorizedFailure for UnauthorizedException', () async {
-      final result = await safeCall<String>(() async {
-        throw DioException(
-          requestOptions: RequestOptions(path: '/test'),
-          error: UnauthorizedException(message: 'unauthorized'),
-        );
-      });
+    test(
+      'returns Left UnauthorizedFailure for UnauthorizedException',
+      () async {
+        final result = await safeCall<String>(() async {
+          throw DioException(
+            requestOptions: RequestOptions(path: '/test'),
+            error: UnauthorizedException(message: 'unauthorized'),
+          );
+        });
 
-      expect(result, isA<Left<Failure, String>>());
-      result.fold(
-        (failure) => expect(failure.message, 'unauthorized'),
-        (_) => fail('expected Left'),
-      );
-    });
+        expect(result, isA<Left<Failure, String>>());
+        result.fold(
+          (failure) => expect(failure.message, 'unauthorized'),
+          (_) => fail('expected Left'),
+        );
+      },
+    );
 
     test('returns Left RequestFailure for BadRequestException', () async {
       final result = await safeCall<String>(() async {
@@ -98,6 +102,21 @@ void main() {
       );
     });
 
+    test('maps ConflictException to ConflictFailure', () async {
+      final result = await safeCall<int>(
+        () async => throw DioException(
+          requestOptions: RequestOptions(path: '/items/active'),
+          error: ConflictException(message: 'resource conflict'),
+        ),
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold((failure) {
+        expect(failure, isA<ConflictFailure>());
+        expect(failure.message, 'resource conflict');
+      }, (_) => fail('expected a Left'));
+    });
+
     test('returns Left AuthFailure for AuthFailure', () async {
       final result = await safeCall<String>(() async {
         throw DioException(
@@ -126,12 +145,37 @@ void main() {
       );
     });
 
-    test('returns Left Unknown for unknown DioException', () async {
+    test('keeps the underlying error for an unknown DioException', () async {
       final result = await safeCall<String>(() async {
         throw DioException(
           requestOptions: RequestOptions(path: '/test'),
           error: 'some unknown error',
         );
+      });
+
+      result.fold(
+        (failure) => expect(failure.message, 'some unknown error'),
+        (_) => fail('expected Left'),
+      );
+    });
+
+    test('unwraps an UnknownException carried by a DioException', () async {
+      final result = await safeCall<String>(() async {
+        throw DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          error: UnknownException(message: 'no response from server'),
+        );
+      });
+
+      result.fold(
+        (failure) => expect(failure.message, 'no response from server'),
+        (_) => fail('expected Left'),
+      );
+    });
+
+    test('falls back to the constant when Dio knows nothing', () async {
+      final result = await safeCall<String>(() async {
+        throw DioException(requestOptions: RequestOptions(path: '/test'));
       });
 
       result.fold(
@@ -171,6 +215,55 @@ void main() {
         (failure) => expect(failure.message, 'weird'),
         (_) => fail('expected Left'),
       );
+    });
+  });
+
+  group('safeCall logging', () {
+    setUp(talker.cleanHistory);
+
+    test('stays quiet on success', () async {
+      await safeCall(() async => 'ok');
+      expect(talker.history, isEmpty);
+    });
+
+    test('logs one FailureLog carrying the original exception', () async {
+      final exception = DioException(
+        requestOptions: RequestOptions(path: '/test'),
+        error: ServerException(message: 'boom'),
+      );
+
+      await safeCall<String>(() async => throw exception);
+
+      expect(talker.history, hasLength(1));
+      final entry = talker.history.single;
+      expect(entry.key, FailureLog.logKey);
+      expect(entry.logLevel, LogLevel.error);
+      expect(entry.message, contains('ServerFailure'));
+      expect(entry.message, contains('boom'));
+      expect(entry.exception, same(exception));
+      expect(entry.stackTrace, isNotNull);
+    });
+
+    test('names the failure the caller sees, not the exception thrown', () async {
+      await safeCall<String>(() async {
+        throw DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          error: NotFoundException(message: 'missing'),
+        );
+      });
+
+      // NotFoundException collapses into RequestFailure. The log has to say
+      // what the UI branches on, otherwise it cannot be traced back.
+      expect(talker.history.single.message, contains('RequestFailure'));
+    });
+
+    test('logs the non-dio branches too', () async {
+      await safeCall<String>(() async {
+        throw CacheException(message: 'cold');
+      });
+
+      expect(talker.history.single.key, FailureLog.logKey);
+      expect(talker.history.single.message, contains('CacheFailure'));
     });
   });
 }

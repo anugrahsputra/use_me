@@ -13,10 +13,7 @@ void main() {
     });
 
     test('empty password returns error', () {
-      expect(
-        Password.dirty('').validator(''),
-        PasswordValidationError.empty,
-      );
+      expect(Password.dirty('').validator(''), PasswordValidationError.empty);
     });
   });
 }

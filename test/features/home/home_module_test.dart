@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:use_me/features/home/home.dart';
-import 'package:use_me/features/home/presentation/home_cubit/home_cubit.dart';
 
 void main() {
   late GetIt sl;

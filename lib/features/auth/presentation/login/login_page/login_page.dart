@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:use_me/app/app.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/features/auth/auth.dart';
 import 'package:use_me/injections.dart';
@@ -34,7 +35,8 @@ class _LoginPageState extends State<LoginPage> {
             );
             context.read<LoginBloc>().add(const OnError());
           } else if (state.status == FormzSubmissionStatus.success) {
-            appNavigator.goToHome(context);
+            // The router listens to AppCubit and moves off the login route.
+            di<AppCubit>().loggedIn();
           }
         },
         child: Scaffold(

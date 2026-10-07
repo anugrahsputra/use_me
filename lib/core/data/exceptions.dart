@@ -39,7 +39,15 @@ class ForbiddenException implements Exception {
 }
 
 class NotFoundException implements Exception {
-  NotFoundException({this.message = 'ForbiddenException'});
+  NotFoundException({this.message = 'NotFoundException'});
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class ConflictException implements Exception {
+  ConflictException({this.message = 'ConflictException'});
   final String message;
 
   @override

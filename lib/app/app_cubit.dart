@@ -17,22 +17,33 @@ class AppCubit extends Cubit<AppState> {
 
   Future<void> _checkToken() async {
     emit(const AppLoading());
-    final token = await localStorageManager.readFromStorage('token');
-    if (token != null && token.isNotEmpty) {
-      emit(const AppAuthenticated());
-    } else {
+    final token = await localStorageManager.readFromStorage('access_token');
+    if (token == null || token.isEmpty) {
       emit(const AppUnauthenticated());
+      return;
     }
+    emit(const AppAuthenticated());
   }
+
+  void loggedIn() => emit(const AppAuthenticated());
 
   Future<void> logout() async {
     emit(const AppLoading());
-    localStorageManager.deleteFromStorage('token');
-    // final result = await logoutUsecase();
-    // result.fold(
-    //   (left) => emit(AppError(left.message)),
-    //   (_) => emit(const AppUnauthenticated()),
-    // );
-    emit(const AppUnauthenticated());
+    final result = await logoutUsecase();
+
+    await result.fold(
+      (failure) async {
+        emit(AppError(failure.message));
+      },
+      (_) async {
+        await _clearSession();
+        emit(const AppUnauthenticated());
+      },
+    );
+  }
+
+  Future<void> _clearSession() async {
+    await localStorageManager.deleteFromStorage('access_token');
+    await localStorageManager.deleteFromStorage('refresh_token');
   }
 }

@@ -4,15 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:use_me/core/core.dart';
 
-class _TestInterceptor extends Interceptor with InterceptorMixin {}
-
 void main() {
-  late _TestInterceptor interceptor;
-
-  setUp(() {
-    interceptor = _TestInterceptor();
-  });
-
   group('isConnectionError', () {
     test('returns true for unknown type with SocketException', () {
       final err = DioException(
@@ -20,7 +12,7 @@ void main() {
         type: DioExceptionType.unknown,
         error: const SocketException('no route to host'),
       );
-      expect(interceptor.isConnectionError(err), isTrue);
+      expect(err.isConnectionError, isTrue);
     });
 
     test('returns false for unknown type without SocketException', () {
@@ -29,7 +21,7 @@ void main() {
         type: DioExceptionType.unknown,
         error: 'some string error',
       );
-      expect(interceptor.isConnectionError(err), isFalse);
+      expect(err.isConnectionError, isFalse);
     });
 
     test('returns true for connectionError', () {
@@ -37,7 +29,7 @@ void main() {
         requestOptions: RequestOptions(path: '/test'),
         type: DioExceptionType.connectionError,
       );
-      expect(interceptor.isConnectionError(err), isTrue);
+      expect(err.isConnectionError, isTrue);
     });
 
     test('returns true for connectionTimeout', () {
@@ -45,7 +37,7 @@ void main() {
         requestOptions: RequestOptions(path: '/test'),
         type: DioExceptionType.connectionTimeout,
       );
-      expect(interceptor.isConnectionError(err), isTrue);
+      expect(err.isConnectionError, isTrue);
     });
 
     test('returns false for badResponse', () {
@@ -54,7 +46,7 @@ void main() {
         type: DioExceptionType.badResponse,
         response: Response(requestOptions: RequestOptions(path: '/test')),
       );
-      expect(interceptor.isConnectionError(err), isFalse);
+      expect(err.isConnectionError, isFalse);
     });
   });
 }

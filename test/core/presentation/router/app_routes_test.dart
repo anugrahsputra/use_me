@@ -11,12 +11,16 @@ import 'package:use_me/injections.dart';
 import '../../../helper/mocks.dart';
 
 class MockLogoutUsecase extends Mock implements LogoutUsecase {}
+
 class MockAppNavigator extends Mock implements AppNavigator {}
 
 Widget createTestApp() {
-  return MaterialApp.router(
-    routerConfig: AppRoutes.router,
-  );
+  return MaterialApp.router(routerConfig: router);
+}
+
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
 }
 
 void main() {
@@ -29,19 +33,23 @@ void main() {
     mockLogout = MockLogoutUsecase();
     mockLogin = MockLoginUsecase();
 
-    when(mockStorage.readFromStorage('refresh_token'))
-        .thenAnswer((_) async => null);
-    when(mockStorage.readFromStorage('token'))
-        .thenAnswer((_) async => null);
+    when(
+      mockStorage.readFromStorage('refresh_token'),
+    ).thenAnswer((_) async => null);
+    when(
+      mockStorage.readFromStorage('access_token'),
+    ).thenAnswer((_) async => 'fake_token');
 
     di
-      ..registerFactory<AppNavigator>(() => MockAppNavigator())
+      ..registerLazySingleton<AppNavigator>(() => MockAppNavigator())
       ..registerFactory<LocalStorageManager>(() => mockStorage)
       ..registerFactory<LogoutUsecase>(() => mockLogout)
-      ..registerFactory<AppCubit>(() => AppCubit(
-        localStorageManager: mockStorage,
-        logoutUsecase: mockLogout,
-      ))
+      ..registerLazySingleton<AppCubit>(
+        () => AppCubit(
+          localStorageManager: mockStorage,
+          logoutUsecase: mockLogout,
+        ),
+      )
       ..registerFactory<LoginUsecase>(() => mockLogin)
       ..registerFactory<LoginBloc>(() => LoginBloc(loginUsecase: mockLogin))
       ..registerFactory<HomeCubit>(() => HomeCubit());
@@ -51,35 +59,60 @@ void main() {
     di.reset();
   });
 
-  testWidgets('route builders render expected pages', (tester) async {
+  testWidgets('an authenticated user lands on home and cannot open login', (
+    tester,
+  ) async {
     await tester.pumpWidget(createTestApp());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await settle(tester);
 
-    expect(find.byType(AppSplash), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
 
-    AppRoutes.router.go(AppPages.login);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    router.go(AppPages.login);
+    await settle(tester);
 
-    expect(find.byType(LoginPage), findsOneWidget,
-        reason: 'GoRouter should build LoginPage for ${AppPages.login}');
+    expect(
+      find.byType(HomePage),
+      findsOneWidget,
+      reason: 'Authenticated user should be redirected from /login to /home',
+    );
+  });
 
-    AppRoutes.router.go(AppPages.home);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+  testWidgets('a signed-out user is pinned to login', (tester) async {
+    when(
+      mockStorage.readFromStorage('access_token'),
+    ).thenAnswer((_) async => null);
 
-    expect(find.byType(HomePage), findsOneWidget,
-        reason: 'GoRouter should build HomePage for ${AppPages.home}');
+    await tester.pumpWidget(createTestApp());
+    await settle(tester);
+
+    // The listenable may be bound to an earlier test's cubit, so ask the
+    // router to re-evaluate rather than waiting for a notification.
+    router.go(AppPages.home);
+    await settle(tester);
+
+    expect(
+      find.byType(LoginPage),
+      findsOneWidget,
+      reason: 'A signed-out user must not reach /home',
+    );
+  });
+
+  // _publicRoutes is only an allowlist for the redirect guard. A path can sit
+  // in it with no GoRoute behind it, and GoRouter then fails to resolve it.
+  test('every route reachable without auth is declared', () {
+    final declared = router.configuration.routes
+        .whereType<GoRoute>()
+        .map((route) => route.path)
+        .toSet();
+
+    expect(declared, containsAll([AppPages.splash, AppPages.login]));
   });
 
   testWidgets('isCurrentPage returns true for current route', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         initialRoute: '/test',
-        routes: {
-          '/test': (context) => const Text('TestPage'),
-        },
+        routes: {'/test': (context) => const Text('TestPage')},
       ),
     );
     await tester.pump();
@@ -89,8 +122,9 @@ void main() {
     expect(navigator.isCurrentPage(context), isTrue);
   });
 
-  testWidgets('isCurrentPage returns false for non-current route',
-      (tester) async {
+  testWidgets('isCurrentPage returns false for non-current route', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         initialRoute: '/a',

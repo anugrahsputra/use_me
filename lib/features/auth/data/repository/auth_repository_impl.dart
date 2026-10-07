@@ -15,8 +15,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, LoginEntity>> login(LoginRequest req) async {
     final result = await datasource.login(req);
-    return result.fold(Left.new, (data) {
-      localStorageManager.writeToStorage('token', data.token);
+    return await result.fold((failure) async => Left(failure), (data) async {
+      await localStorageManager.writeToStorage('access_token', data.token);
       return Right(data.toEntity());
     });
   }
@@ -24,9 +24,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> logout() async {
     final result = await datasource.logout();
-    return result.fold(Left.new, (data) {
-      localStorageManager.deleteFromStorage('token');
-      return Right(unit);
-    });
+    return result.fold(Left.new, (_) => const Right(unit));
   }
 }

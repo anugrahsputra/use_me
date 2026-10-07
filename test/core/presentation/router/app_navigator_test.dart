@@ -26,12 +26,6 @@ void main() {
     });
   });
 
-  group('AppRoutes', () {
-    test('router has three routes', () {
-      expect(AppRoutes.router.configuration.routes.length, 3);
-    });
-  });
-
   group('AppNavigator', () {
     Widget createTestApp(GoRouter router) {
       return MaterialApp.router(
@@ -46,11 +40,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/page1',
-            builder: (_, __) => const Text('Page1'),
+            builder: (_, _) => const Text('Page1'),
           ),
           GoRoute(
             path: '/page2',
-            builder: (_, __) => const Text('Page2'),
+            builder: (_, _) => const Text('Page2'),
           ),
         ],
       );
@@ -70,11 +64,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/page1',
-            builder: (_, __) => const Text('Page1'),
+            builder: (_, _) => const Text('Page1'),
           ),
           GoRoute(
             path: '/page2',
-            builder: (_, __) => const Text('Page2'),
+            builder: (_, _) => const Text('Page2'),
           ),
         ],
       );
@@ -94,11 +88,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/page1',
-            builder: (_, __) => const Text('Page1'),
+            builder: (_, _) => const Text('Page1'),
           ),
           GoRoute(
             path: '/page2',
-            builder: (_, __) => const Text('Page2'),
+            builder: (_, _) => const Text('Page2'),
           ),
         ],
       );
@@ -123,11 +117,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/splash',
-            builder: (_, __) => const Text('SplashPage'),
+            builder: (_, _) => const Text('SplashPage'),
           ),
           GoRoute(
             path: '/home',
-            builder: (_, __) => const Text('HomePage'),
+            builder: (_, _) => const Text('HomePage'),
           ),
         ],
       );
@@ -147,11 +141,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/login',
-            builder: (_, __) => const Text('LoginPage'),
+            builder: (_, _) => const Text('LoginPage'),
           ),
           GoRoute(
             path: '/home',
-            builder: (_, __) => const Text('HomePage'),
+            builder: (_, _) => const Text('HomePage'),
           ),
         ],
       );
@@ -171,11 +165,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/register',
-            builder: (_, __) => const Text('RegisterPage'),
+            builder: (_, _) => const Text('RegisterPage'),
           ),
           GoRoute(
             path: '/home',
-            builder: (_, __) => const Text('HomePage'),
+            builder: (_, _) => const Text('HomePage'),
           ),
         ],
       );
@@ -195,11 +189,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/splash',
-            builder: (_, __) => const Text('SplashPage'),
+            builder: (_, _) => const Text('SplashPage'),
           ),
           GoRoute(
             path: '/home',
-            builder: (_, __) => const Text('HomePage'),
+            builder: (_, _) => const Text('HomePage'),
           ),
         ],
       );

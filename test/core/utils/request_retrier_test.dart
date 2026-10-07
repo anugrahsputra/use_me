@@ -25,21 +25,27 @@ void main() {
   group('ClientRequestRetrier', () {
     test('retries request after connection is restored', () async {
       final statusController = StreamController<InternetConnectionStatus>();
-      when(mockChecker.onStatusChange).thenAnswer((_) => statusController.stream);
+      when(
+        mockChecker.onStatusChange,
+      ).thenAnswer((_) => statusController.stream);
 
-      when(mockDio.request<dynamic>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-        onSendProgress: anyNamed('onSendProgress'),
-      )).thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/test'),
-        statusCode: 200,
-        data: 'retried',
-      ));
+      when(
+        mockDio.request<dynamic>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+          onSendProgress: anyNamed('onSendProgress'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/test'),
+          statusCode: 200,
+          data: 'retried',
+        ),
+      );
 
       final options = RequestOptions(path: '/test');
       final future = retrier.retryRequest<dynamic>(options);
@@ -50,15 +56,17 @@ void main() {
       final result = await future;
       expect(result.statusCode, 200);
       expect(result.data, 'retried');
-      verify(mockDio.request(
-        '/test',
-        data: null,
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: null,
-        onReceiveProgress: null,
-        onSendProgress: null,
-      )).called(1);
+      verify(
+        mockDio.request(
+          '/test',
+          data: null,
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: null,
+          onReceiveProgress: null,
+          onSendProgress: null,
+        ),
+      ).called(1);
     });
   });
 }

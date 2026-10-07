@@ -1,8 +1,11 @@
 export 'app_cubit.dart';
 export 'app_initialize.dart';
 export 'app_splash.dart';
+export 'talker_overlay.dart';
 
 import 'package:flutter/material.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+import 'package:use_me/app/talker_overlay.dart';
 import 'package:use_me/core/core.dart';
 import 'package:use_me/flavors.dart';
 
@@ -20,11 +23,22 @@ class App extends StatelessWidget {
       builder: (context, child) {
         return _flavorBanner(
           child: MaterialApp.router(
-            routerConfig: AppRoutes.router,
+            routerConfig: router,
             scaffoldMessengerKey: scaffoldMessengerKey,
-            title: 'Flutter Demo',
+            title: F.title,
             // theme: AppTheme.light,
             // darkTheme: AppTheme.dark,
+
+            // Inside the router app so the alert overlay and the log screen
+            // both have a Navigator and an Overlay above them.
+            builder: (context, child) => TalkerWrapper(
+              talker: talker,
+              options: const TalkerWrapperOptions(
+                enableErrorAlerts: true,
+                enableExceptionAlerts: true,
+              ),
+              child: TalkerOverlay(child: child ?? const SizedBox.shrink()),
+            ),
 
             // localizationsDelegates: const [
             //   AppLocalizations.delegate,

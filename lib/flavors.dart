@@ -26,10 +26,30 @@ class F {
         return Environment.apiKey;
     }
   }
+
+  static String get apiBaseUrl {
+    switch (appFlavor) {
+      case Flavor.latte:
+        return Environment.apiBaseUrl;
+      case Flavor.macchiato:
+        return Environment.apiBaseUrl;
+      case Flavor.espresso:
+        return Environment.apiBaseUrl;
+    }
+  }
 }
 
 sealed class Environment {
-  static String appName = const String.fromEnvironment('APP_NAME', defaultValue: 'env not loaded');
-  static String apiKey = const String.fromEnvironment('API_KEY', defaultValue: '');
-  static String apiBaseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: '');
+  static String appName = const String.fromEnvironment(
+    'APP_NAME',
+    defaultValue: 'env not loaded',
+  );
+  static String apiKey = const String.fromEnvironment(
+    'API_KEY',
+    defaultValue: '',
+  );
+  static String apiBaseUrl = const String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: '',
+  );
 }

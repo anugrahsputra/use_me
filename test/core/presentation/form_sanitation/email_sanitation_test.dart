@@ -9,8 +9,14 @@ void main() {
     });
 
     test('valid email passes', () {
-      expect(Email.dirty('test@example.com').validator('test@example.com'), isNull);
-      expect(Email.dirty('user.name@domain.co').validator('user.name@domain.co'), isNull);
+      expect(
+        Email.dirty('test@example.com').validator('test@example.com'),
+        isNull,
+      );
+      expect(
+        Email.dirty('user.name@domain.co').validator('user.name@domain.co'),
+        isNull,
+      );
       expect(Email.dirty('a@b.cd').validator('a@b.cd'), isNull);
     });
 
@@ -19,10 +25,7 @@ void main() {
         Email.dirty('not-email').validator('not-email'),
         EmailValidationError.invalid,
       );
-      expect(
-        Email.dirty('').validator(''),
-        EmailValidationError.invalid,
-      );
+      expect(Email.dirty('').validator(''), EmailValidationError.invalid);
       expect(
         Email.dirty('@domain.com').validator('@domain.com'),
         EmailValidationError.invalid,

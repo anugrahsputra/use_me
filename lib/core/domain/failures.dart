@@ -19,6 +19,9 @@ abstract class Failure with _$Failure {
 
   const factory Failure.forbidden({required String message}) = ForbiddenFailure;
 
+  const factory Failure.conflictFailure({required String message}) =
+      ConflictFailure;
+
   const factory Failure.requestFailure({required String message}) =
       RequestFailure;
 

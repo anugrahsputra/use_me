@@ -1,16 +1,41 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:use_me/flavors.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-final talker = TalkerFlutter.init();
+final talker = TalkerFlutter.init(
+  logger: TalkerLogger(output: Platform.isAndroid ? null : debugPrint),
+);
 
 abstract class AppLogging {
-  static bool isInitialize = false;
+  static bool _initialized = false;
 
-  static Future<void> initialize({bool showLog = false}) async {
-    if (!isInitialize) {
-      talker.configure(
-        settings: TalkerSettings(enabled: showLog),
-      );
-      isInitialize = true;
+  static void initialize({TalkerSettings? settings}) {
+    if (_initialized) return;
+    _initialized = true;
+
+    talker.configure(settings: settings ?? settingsFor(F.appFlavor));
+
+    // Framework errors: a failed build, a layout assert, a bad gesture.
+    FlutterError.onError = (details) =>
+        talker.handle(details.exception, details.stack, 'FlutterError');
+
+    // Everything that escapes to the engine: async gaps, platform channels.
+    // Returning true says we reported it, so the app keeps running.
+    PlatformDispatcher.instance.onError = (error, stack) {
+      talker.handle(error, stack, 'PlatformDispatcher');
+      return true;
+    };
+  }
+
+  static TalkerSettings settingsFor(Flavor flavor) {
+    switch (flavor) {
+      case Flavor.espresso:
+        return TalkerSettings(enabled: false);
+      case Flavor.macchiato:
+      case Flavor.latte:
+        return TalkerSettings(enabled: true);
     }
   }
 }

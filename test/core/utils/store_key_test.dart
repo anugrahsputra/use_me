@@ -25,8 +25,9 @@ void main() {
     });
 
     test('getStoredKey returns existing key', () async {
-      when(mockStorage.readFromStorage('encryption_key'))
-          .thenAnswer((_) async => 'existing_key_value');
+      when(
+        mockStorage.readFromStorage('encryption_key'),
+      ).thenAnswer((_) async => 'existing_key_value');
 
       final key = await storeKey.getStoredKey();
 
@@ -34,8 +35,9 @@ void main() {
     });
 
     test('getStoredKey generates new key when none exists', () async {
-      when(mockStorage.readFromStorage('encryption_key'))
-          .thenAnswer((_) async => null);
+      when(
+        mockStorage.readFromStorage('encryption_key'),
+      ).thenAnswer((_) async => null);
       when(mockStorage.writeToStorage(any, any)).thenAnswer((_) async {});
 
       final key = await storeKey.getStoredKey();
@@ -45,8 +47,9 @@ void main() {
     });
 
     test('createCacheCipher returns a CacheCipher', () async {
-      when(mockStorage.readFromStorage('encryption_key'))
-          .thenAnswer((_) async => '1234567890123456'); // 16 chars = 128-bit AES
+      when(
+        mockStorage.readFromStorage('encryption_key'),
+      ).thenAnswer((_) async => '1234567890123456'); // 16 chars = 128-bit AES
 
       final cipher = await storeKey.createCacheCipher();
 
@@ -56,8 +59,9 @@ void main() {
     });
 
     test('CacheCipher encrypt then decrypt roundtrip', () async {
-      when(mockStorage.readFromStorage('encryption_key'))
-          .thenAnswer((_) async => '1234567890123456'); // 16 chars = 128-bit AES
+      when(
+        mockStorage.readFromStorage('encryption_key'),
+      ).thenAnswer((_) async => '1234567890123456'); // 16 chars = 128-bit AES
 
       final cipher = await storeKey.createCacheCipher();
       final original = [1, 2, 3, 4, 5];

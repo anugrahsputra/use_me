@@ -39,6 +39,12 @@ void main() {
       expect(f, isA<Failure>());
     });
 
+    test('Failure.conflictFailure', () {
+      final f = Failure.conflictFailure(message: 'resource conflict');
+      expect(f.message, 'resource conflict');
+      expect(f, isA<Failure>());
+    });
+
     test('Failure.requestFailure', () {
       final f = Failure.requestFailure(message: 'bad request');
       expect(f.message, 'bad request');

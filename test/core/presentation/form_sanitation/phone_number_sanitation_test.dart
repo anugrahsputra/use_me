@@ -10,10 +10,19 @@ void main() {
 
     test('valid Indonesian phone numbers pass', () {
       expect(PhoneNumber.dirty('08123456789').validator('08123456789'), isNull);
-      expect(PhoneNumber.dirty('+628123456789').validator('+628123456789'), isNull);
-      expect(PhoneNumber.dirty('628123456789').validator('628123456789'), isNull);
+      expect(
+        PhoneNumber.dirty('+628123456789').validator('+628123456789'),
+        isNull,
+      );
+      expect(
+        PhoneNumber.dirty('628123456789').validator('628123456789'),
+        isNull,
+      );
       expect(PhoneNumber.dirty('0812345678').validator('0812345678'), isNull);
-      expect(PhoneNumber.dirty('081234567890').validator('081234567890'), isNull);
+      expect(
+        PhoneNumber.dirty('081234567890').validator('081234567890'),
+        isNull,
+      );
     });
 
     test('empty value returns empty error', () {

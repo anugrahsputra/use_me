@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:use_me/core/utils/app_logging.dart';
 import 'package:use_me/core/core.dart';
 
 class StoreKey {
@@ -21,7 +20,6 @@ class StoreKey {
   Future<String> getStoredKey() async {
     var key = await localStorageManager.readFromStorage('encryption_key');
     key ??= await generateKey();
-    talker.info('Stored key: $key');
 
     return key;
   }
