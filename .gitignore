@@ -44,11 +44,25 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# FVM Version Cache
-.fvm/\n# Environment Variables\n.env*
-
 sentry.properties
 
 .env.espresso.json
 .env.latte.json
 .env.macchiato.json
+
+# FVM Version Cache
+.fvm/
+
+# Graphify Output
+graphify-out/
+
+# Agent/Developer Environment Directories
+.agents/
+.opencode/
+.antigravitycli/
+.handoff/
+
+# build_runner output — regenerate with `fvm dart run build_runner build`
+*.freezed.dart
+*.g.dart
+*.mocks.dart

@@ -87,4 +87,8 @@ rm rename.json
 flutter clean
 flutter pub get
 
+# Generated files are git-ignored, so a fresh clone has none yet.
+echo "🏗️ Generating code..."
+dart run build_runner build
+
 echo "✅ Setup complete! You're ready to code 🚀"

@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "com.downormal.use_me"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage 11 compiles against API 37; Flutter 3.47 still
+    // defaults to 36. Drop this back to flutter.compileSdkVersion once Flutter
+    // catches up.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     buildFeatures {

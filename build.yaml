@@ -1,0 +1,50 @@
+# Scopes code generation to the files that actually generate something.
+# Without this, every builder below auto-applies to every file in lib/
+# and test/, while only a handful produce output.
+#
+# The generate_for globs follow this repo's filename convention
+# (*_bloc.dart, *_cubit.dart, *_dto.dart, *_entity.dart) rather than
+# directory names, because the directory layout is inconsistent:
+# blocs/, login_bloc/, and home_cubit/ all hold the same kind of file.
+# If you add a Freezed class that does not match one of these suffixes,
+# add its glob here or it will silently not generate.
+targets:
+  $default:
+    builders:
+      freezed:
+        generate_for:
+          include:
+            - lib/core/**.dart
+            - lib/**/*_bloc.dart
+            - lib/**/*_cubit.dart
+            - lib/**/*_dto.dart
+            - lib/**/*_entity.dart
+
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**/*_dto.dart
+
+      # Default is already test/**, narrowed to the one file that
+      # declares @GenerateMocks / @GenerateNiceMocks.
+      mockito|mockBuilder:
+        generate_for:
+          include:
+            - test/helper/mocks.dart
+
+      # hive_ce and hive_ce_flutter are runtime dependencies, so
+      # hive_ce_generator's builders auto-apply to this package even
+      # though nothing here declares @HiveType or @GenerateAdapters.
+      # hive_registrar_intermediate_generator alone runs once per file
+      # in lib/. Two of these also declare required_inputs:
+      # [.freezed.dart], which makes build_runner wait for freezed to
+      # finish across the whole package before they start.
+      # Re-enable when a real Hive adapter lands.
+      hive_ce_generator|hive_type_adapter_generator:
+        enabled: false
+      hive_ce_generator|hive_registrar_intermediate_generator:
+        enabled: false
+      hive_ce_generator|hive_registrar_generator:
+        enabled: false
+      hive_ce_generator|hive_adapters_generator:
+        enabled: false
