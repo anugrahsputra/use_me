@@ -30,31 +30,23 @@ We use 3 distinct flavors to manage the application lifecycle:
 
 ### Running the App
 
-**Terminal (via Quick Scripts):**
+Recipes live in the `justfile` ([just](https://github.com/casey/just)). Run `just` to list them all.
+
 ```bash
-# Run Development (Latte)
-./run_latte.sh
+just latte        # dev
+just macchiato    # staging
+just espresso     # production
 
-# Run Staging (Macchiato)
-./run_macchiato.sh
-
-# Run Production (Espresso)
-./run_espresso.sh
+# Extra args pass through, e.g.:
+just latte -d macOS --release
 ```
 
-*(Note: You can pass additional arguments like device targets or build mode directly to the scripts, e.g. `./run_latte.sh -d macOS` or `./run_latte.sh --release`)*
-
-**Terminal (Underlying Commands):**
+Underlying form:
 ```bash
-# Run Development
-flutter run --flavor latte -t lib/main_latte.dart --dart-define-from-file=.env.latte.json
-
-# Run Staging
-flutter run --flavor macchiato -t lib/main_macchiato.dart --dart-define-from-file=.env.macchiato.json
-
-# Run Production
-flutter run --flavor espresso -t lib/main_espresso.dart --dart-define-from-file=.env.espresso.json
+fvm flutter run --flavor latte -t lib/main_latte.dart --dart-define-from-file=.env.latte.json
 ```
+
+Flutter is pinned to **3.47.0** via FVM (`.fvmrc`). Prefer `fvm flutter` / `fvm dart`.
 
 **VS Code:**
 Open the `Run & Debug` panel and select either **Latte**, **Macchiato**, or **Espresso**.
@@ -71,10 +63,31 @@ Managed via Flutter's native `--dart-define-from-file` flag. Each flavor loads i
 
 *Note: These files are excluded from git via `.gitignore`.*
 
+`lib/flavors.dart` reads `APP_NAME`, `API_KEY`, and `API_BASE_URL` through `String.fromEnvironment`. `API_BASE_URL` becomes the Dio `baseUrl`, and a non-empty `API_KEY` goes out as the `x-api-key` header.
+
 ### 2. Native API Keys
 Injected at compile-time to avoid hardcoding secrets in manifests:
 *   **Android:** Configured in `android/app/flavorizr.gradle.kts` via `resValue`.
 *   **iOS:** Configured in `ios/Flutter/*.xcconfig` files.
+
+---
+
+## Codegen
+
+Generated files (`*.freezed.dart`, `*.g.dart`, `*.mocks.dart`) are git-ignored. `setup.sh` generates them once; after that, rerun whenever a Freezed, JSON, or mock source changes:
+
+```bash
+just build    # one-off
+just watch    # rebuild on save
+```
+
+`build.yaml` limits each builder to the files that use it, by filename suffix (`*_bloc.dart`, `*_cubit.dart`, `*_dto.dart`, `*_entity.dart`, anything in `lib/core/`). A Freezed class in a file outside those patterns will not generate until you add its glob there.
+
+---
+
+## Debug logs
+
+All logging goes through one `talker` instance (`lib/core/utils/app_logging.dart`). Latte and Macchiato log, Espresso does not. Debug builds show a floating bug button that opens the Talker log screen with every request, response, bloc event, and `Failure`.
 
 ---
 
