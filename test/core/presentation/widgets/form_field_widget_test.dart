@@ -7,11 +7,7 @@ void main() {
     testWidgets('renders with hint text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: FormFieldWidget(
-              hintText: 'Enter text',
-            ),
-          ),
+          home: Scaffold(body: FormFieldWidget(hintText: 'Enter text')),
         ),
       );
 
@@ -21,11 +17,7 @@ void main() {
     testWidgets('renders with initial value', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: FormFieldWidget(
-              initialValue: 'Prefilled',
-            ),
-          ),
+          home: Scaffold(body: FormFieldWidget(initialValue: 'Prefilled')),
         ),
       );
 
@@ -36,10 +28,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FormFieldWidget(
-              isPassword: true,
-              hintText: 'Password',
-            ),
+            body: FormFieldWidget(isPassword: true, hintText: 'Password'),
           ),
         ),
       );
@@ -50,13 +39,7 @@ void main() {
 
     testWidgets('toggles password visibility', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FormFieldWidget(
-              isPassword: true,
-            ),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: FormFieldWidget(isPassword: true))),
       );
 
       expect(find.byIcon(Icons.visibility_off), findsOneWidget);
@@ -71,9 +54,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FormFieldWidget(
-              prefixIcon: const Icon(Icons.person),
-            ),
+            body: FormFieldWidget(prefixIcon: const Icon(Icons.person)),
           ),
         ),
       );
@@ -84,11 +65,7 @@ void main() {
     testWidgets('renders error text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: FormFieldWidget(
-              errorText: 'Error message',
-            ),
-          ),
+          home: Scaffold(body: FormFieldWidget(errorText: 'Error message')),
         ),
       );
 
@@ -119,14 +96,132 @@ void main() {
 
     testWidgets('non-password field has no suffix icon', (tester) async {
       await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: const FormFieldWidget())),
+      );
+
+      expect(find.byIcon(Icons.visibility_off), findsNothing);
+    });
+
+    InputDecoration decorationOf(WidgetTester tester) =>
+        tester.widget<InputDecorator>(find.byType(InputDecorator)).decoration;
+
+    testWidgets('keeps the theme fill when no fillColor is given', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: const FormFieldWidget(),
+          theme: AppTheme.light,
+          home: const Scaffold(body: FormFieldWidget()),
+        ),
+      );
+
+      expect(decorationOf(tester).filled, isTrue);
+      expect(decorationOf(tester).fillColor, AppColors.canvas);
+    });
+
+    testWidgets('fillColor overrides the theme fill', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: FormFieldWidget(fillColor: AppColors.surfaceCard),
           ),
         ),
       );
 
-      expect(find.byIcon(Icons.visibility_off), findsNothing);
+      expect(decorationOf(tester).filled, isTrue);
+      expect(decorationOf(tester).fillColor, AppColors.surfaceCard);
+    });
+
+    testWidgets('borders come from the theme without borderRadius', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(body: FormFieldWidget()),
+        ),
+      );
+
+      expect(
+        decorationOf(tester).enabledBorder,
+        isA<OutlineInputBorder>().having(
+          (b) => b.borderRadius,
+          'borderRadius',
+          BorderRadius.circular(AppRadius.md),
+        ),
+      );
+    });
+
+    testWidgets('borderRadius applies to every border state', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(body: FormFieldWidget(borderRadius: 24)),
+        ),
+      );
+
+      final decoration = decorationOf(tester);
+      for (final border in [
+        decoration.enabledBorder,
+        decoration.focusedBorder,
+        decoration.errorBorder,
+        decoration.focusedErrorBorder,
+      ]) {
+        expect(
+          border,
+          isA<OutlineInputBorder>().having(
+            (b) => b.borderRadius,
+            'borderRadius',
+            BorderRadius.circular(24),
+          ),
+        );
+      }
+    });
+
+    testWidgets('shows suffixIcon on a plain field', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: FormFieldWidget(suffixIcon: Icon(Icons.close))),
+        ),
+      );
+
+      expect(find.byIcon(Icons.close), findsOneWidget);
+    });
+
+    testWidgets('password field keeps its toggle over suffixIcon', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: FormFieldWidget(
+              isPassword: true,
+              suffixIcon: Icon(Icons.close),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.close), findsNothing);
+      expect(find.byIcon(Icons.visibility_off), findsOneWidget);
+    });
+
+    testWidgets('autofocus focuses the field on first build', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: FormFieldWidget(autofocus: true)),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<EditableText>(find.byType(EditableText))
+            .focusNode
+            .hasFocus,
+        isTrue,
+      );
     });
   });
 }

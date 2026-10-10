@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:use_me/core/core.dart';
@@ -8,10 +9,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ButtonWidget(
-              onTap: () {},
-              child: const Text('Click me'),
-            ),
+            body: ButtonWidget(onTap: () {}, child: const Text('Click me')),
           ),
         ),
       );
@@ -69,6 +67,83 @@ void main() {
       );
 
       expect(find.text('Enabled'), findsOneWidget);
+    });
+
+    testWidgets('defaults to enabled, full width, theme primary', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: ButtonWidget(onTap: () {}, child: const Text('Wide')),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(Ink)).width, 800);
+      expect(
+        tester.widget<Ink>(find.byType(Ink)).decoration,
+        isA<BoxDecoration>().having((d) => d.color, 'color', AppColors.primary),
+      );
+    });
+
+    testWidgets('color overrides the theme primary', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: ButtonWidget(
+              onTap: () {},
+              color: AppColors.error,
+              child: const Text('Danger'),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.widget<Ink>(find.byType(Ink)).decoration,
+        isA<BoxDecoration>().having((d) => d.color, 'color', AppColors.error),
+      );
+    });
+
+    testWidgets('fires onTap on iOS', (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light.copyWith(platform: TargetPlatform.iOS),
+          home: Scaffold(
+            body: ButtonWidget(
+              onTap: () => tapped = true,
+              child: const Text('Tap'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoButton));
+      await tester.pumpAndSettle();
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('null onTap on iOS does not throw', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light.copyWith(platform: TargetPlatform.iOS),
+          home: const Scaffold(
+            body: ButtonWidget(
+              onTap: null,
+              isEnabled: false,
+              child: Text('Disabled'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoButton));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
   });
 }

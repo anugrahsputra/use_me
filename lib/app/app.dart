@@ -19,15 +19,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: F.title,
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: AppTheme.light,
       builder: (context, child) {
         return _flavorBanner(
           child: MaterialApp.router(
             routerConfig: router,
             scaffoldMessengerKey: scaffoldMessengerKey,
             title: F.title,
-            // theme: AppTheme.light,
-            // darkTheme: AppTheme.dark,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
 
             // Inside the router app so the alert overlay and the log screen
             // both have a Navigator and an Overlay above them.
